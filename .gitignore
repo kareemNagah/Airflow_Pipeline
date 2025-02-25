@@ -1,0 +1,27 @@
+# Environment variables
+.env
+
+# Data directory
+Data/
+
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Airflow logs and temporary files
+logs/
+airflow.db
+airflow.cfg
+webserver_config.py
+airflow-webserver.pid
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+reset.txt

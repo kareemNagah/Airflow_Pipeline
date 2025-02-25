@@ -1,0 +1,10 @@
+setuptools>=65.0.0
+wheel>=0.40.0
+numpy>=1.24.3
+pandas>=1.5.3
+sqlalchemy==1.4.50
+psycopg2-binary==2.9.9
+apache-airflow==2.7.1
+python-dotenv==1.0.0
+typing-extensions>=4.5.0
+pathlib==1.0.1

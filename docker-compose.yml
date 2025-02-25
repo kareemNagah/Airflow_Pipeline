@@ -1,0 +1,102 @@
+version: '3.8'
+services:
+  postgres_db:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    networks:
+      - etl_network
+
+  airflow-init:
+    image: apache/airflow:2.7.1
+    container_name: airflow_init
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres_db/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=airflow
+      - _AIRFLOW_WWW_USER_PASSWORD=airflow
+    command: >
+      bash -c "
+        pip install -r /requirements.txt &&
+        airflow db init &&
+        airflow users create \
+          --username airflow \
+          --firstname admin \
+          --lastname admin \
+          --role Admin \
+          --email admin@example.com \
+          --password airflow
+      "
+    volumes:
+      - ./requirements.txt:/requirements.txt
+    networks:
+      - etl_network
+
+  airflow-webserver:
+    image: apache/airflow:2.7.1
+    container_name: airflow_webserver
+    depends_on:
+      - airflow-init
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres_db/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./requirements.txt:/requirements.txt
+      
+    command: >
+      bash -c "
+        pip install -r /requirements.txt &&
+        airflow webserver
+      "
+    ports:
+      - "8080:8080"
+    networks:
+      - etl_network
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.1
+    container_name: airflow_scheduler
+    depends_on:
+      - airflow-init
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres_db/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./requirements.txt:/requirements.txt
+    command: >
+      bash -c "
+        pip install -r /requirements.txt &&
+        airflow scheduler
+      "
+    networks:
+      - etl_network
+
+networks:
+  etl_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
