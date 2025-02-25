@@ -103,6 +103,4 @@ docker restart postgres_container
 ## Contributing
 Feel free to submit issues or contribute improvements via pull requests.
 
-## License
-This project is licensed under the MIT License.
 
