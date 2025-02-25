@@ -7,6 +7,12 @@ Ensure you have the following installed:
 - Python 3.x
 - Git
 
+If Docker is not installed, you can install it using the following commands:
+```bash
+curl -v https://get.docker.com > get-docker.sh
+sudo sh get-docker.sh
+```
+
 ## Setup Instructions
 
 ### 1. Clone the Repository
@@ -102,5 +108,6 @@ docker restart postgres_container
 
 ## Contributing
 Feel free to submit issues or contribute improvements via pull requests.
+
 
 
